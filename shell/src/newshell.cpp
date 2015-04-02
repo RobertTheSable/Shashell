@@ -14,7 +14,7 @@ int main(){
       {
         cout << prompt << "> ";
         getline(cin,command);
-        command=parsecommand(command);
+        //command=parsecommand(command);    commented out because this function currently breaks the exit command.
         
       if (command == "shaprompt")
       {
