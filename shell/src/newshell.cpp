@@ -37,6 +37,11 @@ int main(){
       {
         cout << "I think you meant to type \"chmod\"\n";
       }
+      else if (command == "ls")
+      {
+        execl("/bin/ls", "ls", (char *)0); //this works, BUT it immediately exits to bash and I don't know why.
+        				   //likely it needs to fork prior to the call. but that's for Lena to figure out
+      }
       else
 	    error(command);
 	    
