@@ -2,6 +2,7 @@
 #include <time.h>
 #include <string.h>
 #include <unistd.h> //allows use of unix system calls, like execl(). Rather important.
+#include <stdlib.h>
 
 using namespace std;
 
@@ -15,6 +16,7 @@ int main(){
       {
         cout << prompt << "> ";
         getline(cin,command);
+        quickcompile(command);
         //command=parsecommand(command);    commented out because this function currently breaks the exit command.
         
       if (command == "shaprompt")
@@ -35,7 +37,7 @@ int main(){
       }
       else if (command == "shamod")
       {
-        cout << "I think you meant to type \"chmod\"\n";
+        cout << "I think you meant to type \"chmod\"\n"; //we should probably actually get this functional...
       }
       else if (command == "ls")
       {
@@ -81,4 +83,44 @@ string parsecommand(string command)
        //cout << j << endl;
         return command;
     }
+}
+
+void quickcompile(string& command) //This is functional, now it just needs to be made pretty
+{
+    ifstream input;
+    string compile;
+    /*put in parser(maybe)*/
+    if(command.find(".cpp") != string::npos)
+    {
+        input.open(command.c_str());
+        if(!input)
+        {
+            cout << "error: " << command << " not found\n";
+            input.close();
+            command.clear();
+            return;
+        }
+        compile="echo -n ' '; g++";
+        compile=compile + " " + command;
+        system(compile.c_str());
+        command.clear();
+    }
+    else if(command.find(".c") != string::npos)
+    {
+        input.open(command.c_str());
+        if(!input)
+        {
+            cout << "error: " << command << " not found\n";
+            input.close();
+            command.clear();
+            return;
+        }
+        compile="echo -n ' '; gcc";
+        compile=compile + " " + command;
+        system(compile.c_str());
+        command.clear();
+    }
+    else
+        return;
+    
 }
