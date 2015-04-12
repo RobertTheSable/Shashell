@@ -3,11 +3,14 @@
 #include <string.h>
 #include <unistd.h> //allows use of unix system calls, like execl(). Rather important.
 #include <stdlib.h>
+#include <fstream>
 
 using namespace std;
 
 void error(string);
 string parsecommand(string);
+void changeDir(const char*);
+void quickcompile(string&);
 
 int main(){
       string prompt="mysh";
@@ -44,6 +47,21 @@ int main(){
         execl("/bin/ls", "ls", (char *)0); //this works, BUT it immediately exits to bash and I don't know why.
         				   //likely it needs to fork prior to the call. but that's for Lena to figure out
       }
+      else if(command.substr(0, 2) == "cd")
+	{
+		if(command.length() == 2)
+		{
+			changeDir("");
+		}
+		else
+		{	
+		string dir = command.substr(3);
+		cout << dir.find_first_of(" ") ; 
+		dir = dir.substr(0, dir.find_first_of(" "));
+		//cout << dir << endl;
+		changeDir(dir.c_str());
+		}
+	}
       else
 	    error(command);
 	    
@@ -124,3 +142,19 @@ void quickcompile(string& command) //This is functional, now it just needs to be
         return;
     
 }
+
+void changeDir(const char* newDir)
+{
+	if(strcmp(newDir,"") == 0)
+	{
+		chdir(getenv("HOME"));
+	}
+	else
+	{
+		if(chdir(newDir) == -1)
+		{
+			cout << newDir << ": No such directory.\n";
+		}
+	}
+}
+
