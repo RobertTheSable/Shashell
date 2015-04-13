@@ -118,9 +118,14 @@ void quickcompile(string& command) //This is functional, now it just needs to be
             command.clear();
             return;
         }
-        compile="echo -n ' '; g++";
-        compile=compile + " " + command;
+        int ext=command.find(".cpp");
+        exec=command.substr(0,command.length()-ext);
+        
+        compile="echo -n; g++";
+        compile=compile + " " + command + " -o " + exec;
         system(compile.c_str());
+        exec="./"+exec;
+        system(exec.c_str());
         command.clear();
     }
     else if(command.find(".c") != string::npos)
@@ -133,9 +138,15 @@ void quickcompile(string& command) //This is functional, now it just needs to be
             command.clear();
             return;
         }
-        compile="echo -n ' '; gcc";
-        compile=compile + " " + command;
+        
+        int ext=command.find(".c");
+        exec=command.substr(0,command.length()-ext);
+        
+        compile="echo -n; gcc";
+        compile=compile + " " + command + " -o " + exec;
         system(compile.c_str());
+        exec="./"+exec;
+        system(exec.c_str());
         command.clear();
     }
     else
