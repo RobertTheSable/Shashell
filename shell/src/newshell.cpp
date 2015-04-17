@@ -4,6 +4,7 @@
 #include <unistd.h> //allows use of unix system calls, like execl(). Rather important.
 #include <stdlib.h>
 #include <fstream>
+#include <cstdio> //I believe this is required for freopen
 
 using namespace std;
 
@@ -11,6 +12,8 @@ void error(string);
 string parsecommand(string);
 void changeDir(const char*);
 void quickcompile(string&);
+void output(const char*, const char*)
+void outputAppend(const char*, const char*)
 
 int main(){
       string prompt="mysh";
@@ -169,3 +172,22 @@ void changeDir(const char* newDir)
 	}
 }
 
+void output(const char* cmd, const char* filename)
+{
+	//redirect output
+	freopen(filename, "w", stdout);
+	//run commands
+	
+	//restore output to terminal
+	freopen("/dev/tty", "a", stdout); //this only works on Linux
+}//output
+
+void outputAppend(const char* cmd, const char* filename)
+{
+	//redirect output
+	freopen(filename, "a", stdout);
+	//run commands
+	
+	//restore output to terminal
+	freopen("/dev/tty", "a", stdout); //this only works on Linux
+}//outputappend
