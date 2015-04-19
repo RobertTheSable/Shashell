@@ -24,8 +24,27 @@ int main(){
         getline(cin,command);
         quickcompile(command);
         //command=parsecommand(command);    commented out because this function currently breaks the exit command.
-        
-      if (command == "shaprompt")
+        if(command.find(">") != string::npos || command.find(">>") != string::npos)
+	{
+		int pos = command.find(">");
+		string part1;//command
+		string part2;//filename
+		const char* cmd = part1.c_str();
+		const char* filename;
+		if(command.find(">>") != string::npos)//outputAppend
+		{
+			part2 = command.substr(pos+2, string::npos);
+			filename = part2.c_str();
+			outputAppend(cmd, filename);
+		}//if
+		else//output
+		{
+			part2 = command.substr(pos+1, string::npos);
+			filename = part2.c_str();
+			output(cmd, filename);
+		}//else
+	}//if
+      else if (command == "shaprompt")
       {
         cout << "New prompt? ";
         getline(cin, prompt);
