@@ -99,31 +99,37 @@ void error(string command)
         cout << "wrong\n";
 }
 
-*/string parsecommand(string command)
-{
-    int i=command.find_first_not_of(' ');
-    int j=command.find_last_not_of(' ');
-    if(i == 0 && j== 0)
-        return command;
-    else if(j == 0)
-    {
-        command=command.substr(i, command.length()-i);
-        return command;
-    }
-    else if(i==0 && j != 0)
-    {
-        command=command.substr(0, command.length()-j);
-        return command;
-    }
-    else
-    {
-        command=command.substr(i, command.length()-i);
+// This version of the parser was commented out because:
+	// It wasn't working
+	// The code is hard to follow
+
+//string parsecommand(string command) 
+//{
+    //int i=command.find_first_not_of(' ');
+   // int j=command.find_last_not_of(' ');
+    //if(i == 0 && j== 0)
+        //return command;
+    //else if(j == 0)
+    //{
+        //command=command.substr(i, command.length()-i);
+        //return command;
+    //}
+    //else if(i==0 && j != 0)
+    //{
+        //command=command.substr(0, command.length()-j);
+        //return command;
+    //}
+    //else
+    //{
+        //command=command.substr(i, command.length()-i);
         //command==command.substr(0, command.length()-(j-1));
         //command.erase(j+1);
        //cout << j << endl;
-        return command;
-    }
-}*/
+      //  return command;
+    //}
+//}
+
+// This is my version of the parser
 
 string parsecommand(string& command) // Function to parse the command line arguments
 {
