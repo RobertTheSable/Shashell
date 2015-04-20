@@ -99,7 +99,7 @@ void error(string command)
         cout << "wrong\n";
 }
 
-string parsecommand(string command)
+*/string parsecommand(string command)
 {
     int i=command.find_first_not_of(' ');
     int j=command.find_last_not_of(' ');
@@ -123,6 +123,32 @@ string parsecommand(string command)
        //cout << j << endl;
         return command;
     }
+}*/
+
+string parsecommand(string& command) // Function to parse the command line arguments
+{
+	int length = command.length(); // A shorthand so that I didn't have to keep typing command.length()
+	//char newCommand[257];
+	string newCommand;
+	int j;
+	//char *comChar = new char [length + 1]; // The character version of the command string
+	//strcpy(comChar, command.c_str()); // Copy what is in the command string into comChar
+	
+	for(int i = 0; i < length ; i++)
+	{
+		if(command[i] == ' ')
+		{
+			//command.erase(i,1); // Command has a garbage value
+			//command.ignore(co
+			//Blanks = strtok(command, ' ');
+			//strcpy(command, comChar-Blanks);
+			command[i] = newCommand[j]; // ERROR: we copying a null value into command
+
+			
+			j++;							
+		}
+	}
+	command = newCommand;
 }
 
 void quickcompile(string& command) //This is functional, now it just needs to be made pretty
