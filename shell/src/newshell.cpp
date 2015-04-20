@@ -100,8 +100,8 @@ void error(string command)
 }
 
 // This version of the parser was commented out because:
-	// It wasn't working
-	// The code is hard to follow
+	// a.) It wasn't working
+	// b.) The code is hard to follow
 
 //string parsecommand(string command) 
 //{
