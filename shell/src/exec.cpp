@@ -99,7 +99,7 @@ int runExternalCommand(char** args)
 		{
 			if (errno != EINTR) 
 			{
-				perror("waitpid error");
+				perror("waitpid");
 				return EX_SOFTWARE;
 			}
 		}

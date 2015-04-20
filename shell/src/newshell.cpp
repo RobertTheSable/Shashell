@@ -21,17 +21,20 @@ void quickcompile(string&);
 void output(const char*, const char*);
 void outputAppend(const char*, const char*);
 int runExternalCommand(char**);
+int generateArgList(string, char***, int);
 
 int main(){
       string prompt="mysh";
       string command;
       do
       {
+	command = "";
         cout << prompt << "> ";
         getline(cin,command);
         quickcompile(command);
         //command=parsecommand(command);    commented out because this function currently breaks the exit command.
-        if(command.find(">") != string::npos || command.find(">>") != string::npos)
+        //*
+	if(command.find(">") != string::npos || command.find(">>") != string::npos)
 	{
 		int pos = command.find(">");
 		string part1;//command
@@ -77,8 +80,8 @@ int main(){
 	runExternalCommand(&cmd);
 	//execl("/bin/ls", "ls", (char *)0); //this works, BUT it immediately exits to bash and I don't know why.
         			   //likely it needs to fork prior to the call. but that's for Lena to figure out
-      }
-      else if(command.substr(0, 2) == "cd")
+      }//*/
+      else if(command.length() >= 2 && command.substr(0, 2) == "cd")
 	{
 		if(command.length() == 2)
 		{
@@ -86,16 +89,17 @@ int main(){
 		}
 		else
 		{	
-		string dir = command.substr(3);
-		cout << dir.find_first_of(" ") ; 
-		dir = dir.substr(0, dir.find_first_of(" "));
-		//cout << dir << endl;
-		changeDir(dir.c_str());
+			string dir = command.substr(3);
+			//cout << dir.find_first_of(" ") ; 
+			dir = dir.substr(0, dir.find_first_of(" "));
+			//cout << dir << endl;
+			changeDir(dir.c_str());
 		}
 	}
       else
 	    error(command);
 	    
+      
       }while(command != "exit");
       return 0;
 }
@@ -105,7 +109,34 @@ void error(string command)
     if(command == "exit" || command == "")
         return;
     else
-        cout << "wrong\n";
+    {
+	char** arguments;
+	//cout << command << endl;
+	int k = 0;
+	for(int idx = 0; idx < command.size(); idx++)
+	{
+		if(command[idx] == ' ')
+		{
+			k++;
+		}
+	}
+	k++;
+	arguments = (char**)malloc((256) * sizeof(char*));
+	for(int idx = 0; idx < k; idx++)
+	{
+		arguments[idx] = (char*)malloc(256);
+	}
+	int num = generateArgList(command, &arguments, k);
+	
+	runExternalCommand(arguments);
+        //cout << "wrong\n";
+	/*
+	for(int i = 0; i < num; i++)
+	{
+		delete arguments[i];
+	}
+	delete arguments;//*/
+    }
 }
 
 string parsecommand(string command)
@@ -300,10 +331,40 @@ int runExternalCommand(char** args)
 		{
 			if (errno != EINTR) 
 			{
-				perror("waitpid error");
+				perror("waitpid");
 				return EX_SOFTWARE;
 			}
 		}
 	}
 	return err;
+}
+int generateArgList(string command, char*** argList, int k)
+{
+	int x,y;
+	//cout << i;
+	x = 0;
+	y = 0;
+	//(*argList)[0] = "";
+	//cout << x;
+	//cout << command;
+	/*
+	cout <<  command.substr( x, command.find_first_of(' ', x) ) << endl;
+	y = command.find_first_of(' ', x) + 1;
+	cout << command.substr( y , command.find_first_of(' ', y) - y ) << endl;
+	x = command.find_first_of(' ', x) + 1;
+	cout <<  command.substr( x, command.find_first_of(' ', x) - x ) << endl;
+	cout << k << endl;//*/
+	while(y < k)
+	{
+		strcpy((*argList)[y], (command.substr( x, command.find_first_of(' ', x) - x )).c_str());
+		 
+		//cout << y;
+		//cout <<  (command.substr( x, command.find_first_of(' ', x) - x )).c_str() << endl;
+		x = command.find_first_of(' ', x) + 1;
+		//cout << (*argList)[y] << 0 << endl;
+		y++;
+		
+	}
+	return k;
+	//cout << (*argList)[0] << endl;
 }
