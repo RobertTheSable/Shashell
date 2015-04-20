@@ -31,7 +31,7 @@ int main(){
 	command = "";
         cout << prompt << "> ";
         getline(cin,command);
-        quickcompile(command);
+        //quickcompile(command);
         //command=parsecommand(command);    commented out because this function currently breaks the exit command.
         //*
 	if(command.find(">") != string::npos || command.find(">>") != string::npos)
@@ -76,9 +76,7 @@ int main(){
       }
       else if (command == "ls")
       {
-	char* cmd = "ls"; 
-	runExternalCommand(&cmd);
-	//execl("/bin/ls", "ls", (char *)0); //this works, BUT it immediately exits to bash and I don't know why.
+	execl("/bin/ls", "ls", (char *)0); //this works, BUT it immediately exits to bash and I don't know why.
         			   //likely it needs to fork prior to the call. but that's for Lena to figure out
       }//*/
       else if(command.length() >= 2 && command.substr(0, 2) == "cd")
@@ -103,42 +101,6 @@ int main(){
       }while(command != "exit");
       return 0;
 }
-
-void error(string command)
-{
-    if(command == "exit" || command == "")
-        return;
-    else
-    {
-	char** arguments;
-	//cout << command << endl;
-	int k = 0;
-	for(int idx = 0; idx < command.size(); idx++)
-	{
-		if(command[idx] == ' ')
-		{
-			k++;
-		}
-	}
-	k++;
-	arguments = (char**)malloc((256) * sizeof(char*));
-	for(int idx = 0; idx < k; idx++)
-	{
-		arguments[idx] = (char*)malloc(256);
-	}
-	int num = generateArgList(command, &arguments, k);
-	
-	runExternalCommand(arguments);
-        //cout << "wrong\n";
-	/*
-	for(int i = 0; i < num; i++)
-	{
-		delete arguments[i];
-	}
-	delete arguments;//*/
-    }
-}
-
 string parsecommand(string command)
 {
     int i=command.find_first_not_of(' ');
@@ -367,4 +329,38 @@ int generateArgList(string command, char*** argList, int k)
 	}
 	return k;
 	//cout << (*argList)[0] << endl;
+}
+void error(string command)
+{
+    char** arguments;
+    if(command == "exit" || command == "")
+    {
+        return;
+    }
+    
+    else
+    {
+	
+	//cout << command << endl;
+	int k = 0;
+	for(int idx = 0; idx < command.size(); idx++)
+	{
+		if(command[idx] == ' ')
+		{
+			k++;
+		}
+	}
+	k++;
+	arguments = (char**)malloc((256) * sizeof(char*));
+	for(int idx = 0; idx < 256; idx++)
+	{
+		arguments[idx] = (char*)malloc(256);
+	}
+	arguments[k] = NULL;
+	int num = generateArgList(command, &arguments, k);
+	
+	runExternalCommand(arguments);
+        //cout << "wrong\n";
+	//*
+    }
 }
