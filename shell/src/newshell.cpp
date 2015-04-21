@@ -66,8 +66,7 @@ int main(){
       }
       else if (command == "ls")
       {
-        execl("/bin/ls", "ls", (char *)0); //this works, BUT it immediately exits to bash and I don't know why.
-        				   //likely it needs to fork prior to the call. but that's for Lena to figure out
+        system("echo -n; ls");
       }
       else if(command.substr(0, 2) == "cd")
 	{
@@ -127,6 +126,11 @@ string parsecommand(string command)
 
 void quickcompile(string& command) //This is functional, now it just needs to be made pretty
 {
+    if(command.find("gcc") != string::npos || command.find("g++") != string::npos)
+    {
+    	return;
+    }
+    
     ifstream input;
     string compile;
     /*put in parser(maybe)*/
