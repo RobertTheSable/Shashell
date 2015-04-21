@@ -78,7 +78,6 @@ int main(){
 		else
 		{	
 		string dir = command.substr(3);
-		cout << dir.find_first_of(" ") ; 
 		dir = dir.substr(0, dir.find_first_of(" "));
 		//cout << dir << endl;
 		changeDir(dir.c_str());
