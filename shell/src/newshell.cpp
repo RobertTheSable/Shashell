@@ -1,10 +1,16 @@
 #include <iostream>
 #include <time.h>
 #include <string.h>
-#include <unistd.h> //allows use of unix system calls, like execl(). Rather important.
 #include <stdlib.h>
 #include <fstream>
 #include <cstdio> //I believe this is required for freopen
+
+// include unix systemheaders
+#include <unistd.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/wait.h>
+#include <sysexits.h>
 
 using namespace std;
 
@@ -12,14 +18,17 @@ void error(string);
 string parsecommand(string);
 void changeDir(const char*);
 void quickcompile(string&);
-void output(const char*, const char*)
-void outputAppend(const char*, const char*)
+void output(const char*, const char*);
+void outputAppend(const char*, const char*);
+int runExternalCommand(char**);
+int generateArgList(string, char***, int);
 
 int main(){
       string prompt="mysh";
       string command;
       do
       {
+	command = "";
         cout << prompt << "> ";
         getline(cin,command);
         quickcompile(command);
@@ -76,27 +85,31 @@ int main(){
 		}
 		else
 		{	
-		string dir = command.substr(3);
-		cout << dir.find_first_of(" ") ; 
-		dir = dir.substr(0, dir.find_first_of(" "));
-		//cout << dir << endl;
-		changeDir(dir.c_str());
+			string dir = command.substr(3);
+			if(dir[0] == '\"')
+			{
+				
+				dir = dir.substr(1);
+				dir = dir.substr(0, dir.find_first_of('\"'));
+				//cout << dir << 0 << endl;
+			}
+			else
+			{
+				dir = dir.substr(0, dir.find_first_of(" "));
+			}
+			
+			changeDir(dir.c_str());
 		}
 	}
       else
 	    error(command);
 	    
+      
       }while(command != "exit");
       return 0;
 }
 
-void error(string command)
-{
-    if(command == "exit" || command == "")
-        return;
-    else
-        cout << "wrong\n";
-}
+
 
 string parsecommand(string command)
 {
@@ -145,7 +158,7 @@ void quickcompile(string& command) //This is functional, now it just needs to be
             return;
         }
         int ext=command.find(".cpp");
-        exec=command.substr(0,command.length()-ext);
+        string exec=command.substr(0,command.length()-ext);
         
         compile="echo -n; g++";
         compile=compile + " " + command + " -o " + exec;
@@ -166,7 +179,7 @@ void quickcompile(string& command) //This is functional, now it just needs to be
         }
         
         int ext=command.find(".c");
-        exec=command.substr(0,command.length()-ext);
+        string exec=command.substr(0,command.length()-ext);
         
         compile="echo -n; gcc";
         compile=compile + " " + command + " -o " + exec;
@@ -182,15 +195,28 @@ void quickcompile(string& command) //This is functional, now it just needs to be
 
 void changeDir(const char* newDir)
 {
-	if(strcmp(newDir,"") == 0)
+	char dir[256] = "";
+	if(newDir[0] == '~')
 	{
+		char* home = const_cast<char*>(getenv("HOME"));
+		//strcat(home, newDir+1);
+		strcat(dir, home);
+		strcat(dir, newDir+1);
+	}
+	else
+	{
+		strcat(dir, newDir);
+	}
+	if(strcmp(dir,"") == 0)
+	{
+		//cout << "Changing to " << getenv("HOME") << endl;
 		chdir(getenv("HOME"));
 	}
 	else
 	{
-		if(chdir(newDir) == -1)
+		if(chdir(dir) == -1)
 		{
-			cout << newDir << ": No such directory.\n";
+			cout << dir << ": No such directory.\n";
 		}
 	}
 }
@@ -214,3 +240,157 @@ void outputAppend(const char* cmd, const char* filename)
 	//restore output to terminal
 	freopen("/dev/tty", "a", stdout); //this only works on Linux
 }//outputappend
+/*
+ * External commands function.
+ * Takes an array of c strings as an argument.
+ * Array must start with the name of the command to run, followed by the arguments for the function.
+ */
+int runExternalCommand(char** args)
+{
+	int pipedescriptors[2];
+	int readErr, err;
+	pid_t pid;
+
+	/* creates two file descriptors for communication between parent and child
+	*  the first is for reading
+	*  the second is for writing
+	*/
+	int err1 = pipe(pipedescriptors);
+	//set the close on exec flag for the writing file descriptor
+	err1 |= fcntl(pipedescriptors[1], F_SETFD, fcntl(pipedescriptors[1], F_GETFD) | FD_CLOEXEC);
+	//cout << pipedescriptors[0] << endl << pipedescriptors[1] << endl;
+	if(err1 != 0)
+	{
+		//Exits if there was an error in pipe of fcntl
+		cout << "Error while creating file descriptors.\n";
+		return EX_OSERR;
+	}
+	// fork for new process 
+	pid = fork();
+	if(pid < 0)
+	{
+		//fork failed
+		cout << "Error while forking.\n";
+		return EX_OSERR;
+	}
+	else if(pid == 0)
+	{
+		// child process.
+		
+		// close the reading file descriptor in the child since we don't need it.
+		close(pipedescriptors[0]);
+		
+		//execute command
+		execvp(args[0], args );
+		
+		// write information so parent can read it.
+		write(pipedescriptors[1], &errno, sizeof(int));
+		
+		//exit normally
+		_exit(0);
+		// falls through to parent process block.
+	}
+	else
+	{
+		// parent process. 
+		
+		// close the writing file descriptor since we don't need it anymore
+		close(pipedescriptors[1]);
+		
+		// read data from the child.
+		readErr = read(pipedescriptors[0], &err, sizeof(errno));
+		while (readErr == -1) // if there was an error while reading from the file descriptor.
+		{
+			if (errno != EAGAIN && errno != EINTR) 
+			{
+				// if the error is not temporary, i.e file does not exist.
+				break;
+			}
+			// if the function call was interrupted or a resource is unavaliable.
+			readErr = read(pipedescriptors[0], &err, sizeof(errno));
+		}
+		if ( readErr != 0 ) 
+		{
+			// Some error running the command. Usually file does not exist.
+			cout << "Error: " << strerror(err) << endl;
+			return EX_UNAVAILABLE;
+		}
+		// close reading descriptor. 
+		close(pipedescriptors[0]);
+		while (waitpid(pid, &err, 0) == -1) 
+		{
+			if (errno != EINTR) 
+			{
+				perror("waitpid");
+				return EX_SOFTWARE;
+			}
+		}
+	}
+	return err;
+}
+int generateArgList(string command, char*** argList, int k)
+{
+	int x,y;
+	
+	x = 0;
+	y = 0;
+	
+	while(y < k && x < command.length())
+	{
+		//cout << "okay" << endl;
+		if(command[x] == '"')
+		{
+			//int quote = command.find_first_of('"', x+1) - (x+1) ;
+			
+			strcpy((*argList)[y], (command.substr( x+1, command.find_first_of('"', x+1) - (x+1)  )).c_str());
+			
+			//cout << (command.substr( x+1, command.find_first_of('"', x+1) - (x+1)  )).c_str() << endl;
+			//cout << "quote" << endl;
+			x = command.find_first_of('"', x+1) + 2;
+		}
+		else
+		{
+			strcpy((*argList)[y], (command.substr( x, command.find_first_of(' ', x) - x )).c_str());
+			x = command.find_first_of(' ', x) + 1;
+		}
+		
+		y++;
+	}
+	(*argList)[y] = NULL;
+	return k;
+	
+}
+void error(string command)
+{
+    char** arguments;
+    if(command == "exit" || command == "")
+    {
+        return;
+    }
+    
+    else
+    {
+	
+	//cout << command << endl;
+	int k = 0;
+	for(int idx = 0; idx < command.size(); idx++)
+	{
+		if(command[idx] == ' ')
+		{
+			k++;
+		}
+	}
+	k++;
+	arguments = (char**)malloc((256) * sizeof(char*));
+	for(int idx = 0; idx < 256; idx++)
+	{
+		arguments[idx] = (char*)malloc(256);
+	}
+	arguments[k] = NULL;
+	int num = generateArgList(command, &arguments, k);
+	
+	runExternalCommand(arguments);
+        //cout << "wrong\n";
+	//*
+    }
+}
