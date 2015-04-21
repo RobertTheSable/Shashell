@@ -31,10 +31,9 @@ int main(){
 	command = "";
         cout << prompt << "> ";
         getline(cin,command);
-        //quickcompile(command);
+        quickcompile(command);
         //command=parsecommand(command);    commented out because this function currently breaks the exit command.
-        //*
-	if(command.find(">") != string::npos || command.find(">>") != string::npos)
+        if(command.find(">") != string::npos || command.find(">>") != string::npos)
 	{
 		int pos = command.find(">");
 		string part1;//command
@@ -76,15 +75,9 @@ int main(){
       }
       else if (command == "ls")
       {
-		char* cmd[3];
-		cmd[0] = const_cast<char*>("ls");
-		cmd[1] = const_cast<char*>("--color=auto");
-		cmd[2] = NULL;
-		runExternalCommand(cmd);
-	      //execl("/bin/ls", "ls", (char *)0); //this works, BUT it immediately exits to bash and I don't know why.
-        			   //likely it needs to fork prior to the call. but that's for Lena to figure out
-      }//*/
-      else if(command.length() >= 2 && command.substr(0, 2) == "cd")
+        system("echo -n; ls");
+      }
+      else if(command.substr(0, 2) == "cd")
 	{
 		if(command.length() == 2)
 		{
@@ -115,6 +108,9 @@ int main(){
       }while(command != "exit");
       return 0;
 }
+
+
+
 string parsecommand(string command)
 {
     int i=command.find_first_not_of(' ');
@@ -143,6 +139,11 @@ string parsecommand(string command)
 
 void quickcompile(string& command) //This is functional, now it just needs to be made pretty
 {
+    if(command.find("gcc") != string::npos || command.find("g++") != string::npos)
+    {
+    	return;
+    }
+    
     ifstream input;
     string compile;
     /*put in parser(maybe)*/
@@ -157,7 +158,7 @@ void quickcompile(string& command) //This is functional, now it just needs to be
             return;
         }
         int ext=command.find(".cpp");
-        string exec = command.substr(0,command.length()-ext);
+        exec=command.substr(0,command.length()-ext);
         
         compile="echo -n; g++";
         compile=compile + " " + command + " -o " + exec;
@@ -178,7 +179,7 @@ void quickcompile(string& command) //This is functional, now it just needs to be
         }
         
         int ext=command.find(".c");
-        string exec=command.substr(0,command.length()-ext);
+        exec=command.substr(0,command.length()-ext);
         
         compile="echo -n; gcc";
         compile=compile + " " + command + " -o " + exec;
@@ -214,10 +215,9 @@ void changeDir(const char* newDir)
 	}
 	else
 	{
-		//cout << dir << endl;
-		if(chdir(dir) == -1)
+		if(chdir(newDir) == -1)
 		{
-			cout << dir << ": No such directory.\n";
+			cout << newDir << ": No such directory.\n";
 		}
 	}
 }
