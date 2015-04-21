@@ -36,7 +36,7 @@ int main(){
         if(command.find(">") != string::npos || command.find(">>") != string::npos)
 	{
 		int pos = command.find(">");
-		string part1;//command
+		string part1 = command.substr(0, pos-1);//command
 		string part2;//filename
 		const char* cmd = part1.c_str();
 		const char* filename;
