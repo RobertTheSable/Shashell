@@ -76,7 +76,12 @@ int main(){
       }
       else if (command == "ls")
       {
-	      execl("/bin/ls", "ls", (char *)0); //this works, BUT it immediately exits to bash and I don't know why.
+		char* cmd[3];
+		cmd[0] = const_cast<char*>("ls");
+		cmd[1] = const_cast<char*>("--color=auto");
+		cmd[2] = NULL;
+		runExternalCommand(cmd);
+	      //execl("/bin/ls", "ls", (char *)0); //this works, BUT it immediately exits to bash and I don't know why.
         			   //likely it needs to fork prior to the call. but that's for Lena to figure out
       }//*/
       else if(command.length() >= 2 && command.substr(0, 2) == "cd")
@@ -178,15 +183,29 @@ void quickcompile(string& command) //This is functional, now it just needs to be
 
 void changeDir(const char* newDir)
 {
-	if(strcmp(newDir,"") == 0)
+	char dir[256] = "";
+	if(newDir[0] == '~')
 	{
+		char* home = const_cast<char*>(getenv("HOME"));
+		//strcat(home, newDir+1);
+		strcat(dir, home);
+		strcat(dir, newDir+1);
+		//cout << dir << endl;
+	}
+	else
+	{
+		strcat(dir, newDir);
+	}
+	if(strcmp(dir,"") == 0)
+	{
+		cout << "Changing to " << getenv("HOME") << endl;
 		chdir(getenv("HOME"));
 	}
 	else
 	{
-		if(chdir(newDir) == -1)
+		if(chdir(dir) == -1)
 		{
-			cout << newDir << ": No such directory.\n";
+			cout << dir << ": No such directory.\n";
 		}
 	}
 }
@@ -221,7 +240,7 @@ int runExternalCommand(char** args)
 	int readErr, err;
 	pid_t pid;
 
-	/* creates two file descriptors
+	/* creates two file descriptors for communication between parent and child
 	*  the first is for reading
 	*  the second is for writing
 	*/
@@ -247,13 +266,13 @@ int runExternalCommand(char** args)
 	{
 		// child process.
 		
-		// close the reading file descriptor since we don't need it.
+		// close the reading file descriptor in the child since we don't need it.
 		close(pipedescriptors[0]);
 		
 		//execute command
 		execvp(args[0], args );
 		
-		// write to file descriptor.
+		// write information so parent can read it.
 		write(pipedescriptors[1], &errno, sizeof(int));
 		
 		//exit normally
@@ -263,11 +282,11 @@ int runExternalCommand(char** args)
 	else
 	{
 		// parent process. 
+		
 		// close the writing file descriptor since we don't need it anymore
 		close(pipedescriptors[1]);
 		
-		// close(pipedescriptors[0]);
-		// read from the file descriptor. should read 0 bytes.
+		// read data from the child.
 		readErr = read(pipedescriptors[0], &err, sizeof(errno));
 		while (readErr == -1) // if there was an error while reading from the file descriptor.
 		{
