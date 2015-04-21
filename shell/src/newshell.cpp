@@ -75,7 +75,11 @@ int main(){
       }
       else if (command == "ls")
       {
-        system("echo -n; ls");
+        char* cmd[3];
+        cmd[0] = const_cast<char*>("ls");
+        cmd[1] = const_cast<char*>("--color=auto");
+        cmd[2] = NULL;
+        runExternalCommand(cmd);
       }
       else if(command.substr(0, 2) == "cd")
 	{
