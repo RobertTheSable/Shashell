@@ -202,7 +202,6 @@ void changeDir(const char* newDir)
 		//strcat(home, newDir+1);
 		strcat(dir, home);
 		strcat(dir, newDir+1);
-		//cout << dir << endl;
 	}
 	else
 	{
@@ -215,9 +214,9 @@ void changeDir(const char* newDir)
 	}
 	else
 	{
-		if(chdir(newDir) == -1)
+		if(chdir(dir) == -1)
 		{
-			cout << newDir << ": No such directory.\n";
+			cout << dir << ": No such directory.\n";
 		}
 	}
 }
