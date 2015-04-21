@@ -158,7 +158,7 @@ void quickcompile(string& command) //This is functional, now it just needs to be
             return;
         }
         int ext=command.find(".cpp");
-        exec=command.substr(0,command.length()-ext);
+        string exec=command.substr(0,command.length()-ext);
         
         compile="echo -n; g++";
         compile=compile + " " + command + " -o " + exec;
@@ -179,7 +179,7 @@ void quickcompile(string& command) //This is functional, now it just needs to be
         }
         
         int ext=command.find(".c");
-        exec=command.substr(0,command.length()-ext);
+        string exec=command.substr(0,command.length()-ext);
         
         compile="echo -n; gcc";
         compile=compile + " " + command + " -o " + exec;
