@@ -76,7 +76,7 @@ int main(){
       }
       else if (command == "ls")
       {
-	execl("/bin/ls", "ls", (char *)0); //this works, BUT it immediately exits to bash and I don't know why.
+	      execl("/bin/ls", "ls", (char *)0); //this works, BUT it immediately exits to bash and I don't know why.
         			   //likely it needs to fork prior to the call. but that's for Lena to figure out
       }//*/
       else if(command.length() >= 2 && command.substr(0, 2) == "cd")
@@ -88,9 +88,7 @@ int main(){
 		else
 		{	
 			string dir = command.substr(3);
-			//cout << dir.find_first_of(" ") ; 
 			dir = dir.substr(0, dir.find_first_of(" "));
-			//cout << dir << endl;
 			changeDir(dir.c_str());
 		}
 	}
@@ -303,32 +301,22 @@ int runExternalCommand(char** args)
 int generateArgList(string command, char*** argList, int k)
 {
 	int x,y;
-	//cout << i;
+	
 	x = 0;
 	y = 0;
-	//(*argList)[0] = "";
-	//cout << x;
-	//cout << command;
-	/*
-	cout <<  command.substr( x, command.find_first_of(' ', x) ) << endl;
-	y = command.find_first_of(' ', x) + 1;
-	cout << command.substr( y , command.find_first_of(' ', y) - y ) << endl;
-	x = command.find_first_of(' ', x) + 1;
-	cout <<  command.substr( x, command.find_first_of(' ', x) - x ) << endl;
-	cout << k << endl;//*/
+	
 	while(y < k)
 	{
 		strcpy((*argList)[y], (command.substr( x, command.find_first_of(' ', x) - x )).c_str());
 		 
-		//cout << y;
-		//cout <<  (command.substr( x, command.find_first_of(' ', x) - x )).c_str() << endl;
+		
 		x = command.find_first_of(' ', x) + 1;
-		//cout << (*argList)[y] << 0 << endl;
+		
 		y++;
 		
 	}
 	return k;
-	//cout << (*argList)[0] << endl;
+	
 }
 void error(string command)
 {
