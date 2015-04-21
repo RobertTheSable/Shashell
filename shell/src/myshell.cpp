@@ -336,28 +336,26 @@ int generateArgList(string command, char*** argList, int k)
 	x = 0;
 	y = 0;
 	
-	while(y < k && x < command.length())
+	while(y < k)
 	{
-		//cout << "okay" << endl;
+		
 		if(command[x] == '"')
 		{
-			//int quote = command.find_first_of('"', x+1) - (x+1) ;
-			
-			strcpy((*argList)[y], (command.substr( x+1, command.find_first_of('"', x+1) - (x+1)  )).c_str());
-			
-			//cout << (command.substr( x+1, command.find_first_of('"', x+1) - (x+1)  )).c_str() << endl;
-			//cout << "quote" << endl;
-			x = command.find_first_of('"', x+1) + 2;
+			strcpy((*argList)[y], (command.substr( x+1, command.find_first_of('"', x+1) - (x+1) )).c_str());
+		 
+			cout << "quote" << endl;
+			x = command.find_first_of('"', x+1) + 1;
 		}
 		else
 		{
 			strcpy((*argList)[y], (command.substr( x, command.find_first_of(' ', x) - x )).c_str());
-			x = command.find_first_of(' ', x) + 1;
-		}
+		 
 		
+			x = command.find_first_of(' ', x) + 1;
+		}	
 		y++;
+		
 	}
-	(*argList)[y] = NULL;
 	return k;
 	
 }
