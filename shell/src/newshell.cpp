@@ -32,7 +32,7 @@ int main(){
         cout << prompt << "> ";
         getline(cin,command);
         quickcompile(command);
-        //command=parsecommand(command);    commented out because this function currently breaks the exit command.
+        command=parsecommand(command);
         if(command.find(">") != string::npos || command.find(">>") != string::npos)
 	{
 		int pos = command.find(">");
@@ -105,15 +105,7 @@ int main(){
 			changeDir(dir.c_str());
 		}
 	}
-	else if (command == "ver")
-      	{
-        	cout<<"mysh version Shmod Copyright 2015 by Students Jason Parker, Kevin Beson, Joshua Banzhoff, Robert Tulloh, Lena Bosheh\n";
-      	}
-      	else if (command == "pwd")
-      	{
-        	system("echo -n; pwd");
-      	}
-      	else
+      else
 	    error(command);
 	    
       
@@ -123,54 +115,59 @@ int main(){
 
 
 
-string parsecommand(string command)
+string parsecommand(string command) 
 {
-    int i=command.find_first_not_of(' ');
-    int j=command.find_last_not_of(' ');
-    if(i == 0 && j== 0)
+    if (command == "") // If there is absolutely nothing in the command
         return command;
-    else if(j == 0)
+    int i=command.find_first_not_of(' '); // Interger value to ignore preceeding whitespaces
+    int j=command.find_last_not_of(' '); // Integer value to ignore succeeding whitespaces
+    if(i == string::npos && j == string::npos) // If nothing is found in the command line
     {
-        command=command.substr(i, command.length()-i);
-        return command;
-    }
-    else if(i==0 && j != 0)
-    {
-        command=command.substr(0, command.length()-j);
+        command="";
         return command;
     }
-    else
+    if(i == 0 && j== 0) // If there are no whitespaces before or after the command
+        return command;
+    else if(i != 0 && j == 0) // If there are preceeding whitespaces
     {
-        command=command.substr(i, command.length()-i);
-        //command==command.substr(0, command.length()-(j-1));
-        //command.erase(j+1);
-       //cout << j << endl;
+        command=command.substr(i, command.length()-i); // Get rid of the whitespaces
+        return command;
+    }
+    else // If there are succeeding whitespaces
+    {
+        command=command.substr(i, (j-i)+1); // Get rid of the whitespaces
         return command;
     }
 }
 
 void quickcompile(string& command) //This is functional, now it just needs to be made pretty
 {
-    if(command.find("gcc") != string::npos || command.find("g++") != string::npos)
+    if(command.find("gcc") != string::npos || command.find("g++") != string::npos) // If gcc and g++ are found
     {
     	return;
     }
     
-    ifstream input;
-    string compile;
-    /*put in parser(maybe)*/
-    if(command.find(".cpp") != string::npos)
+    ifstream input; // This will represent the current input
+    string compile; // 
+    if(command.find(".cpp") != string::npos) // If the .cpp file extension is found
     {
-        input.open(command.c_str());
-        if(!input)
+        input.open(command.c_str()); /* */
+        if(!input) // If what is trying to be compiled is something random
         {
-            cout << "error: " << command << " not found\n";
-            input.close();
-            command.clear();
+            cout << "error: " << command << " not found\n"; // Print out an error message
+            input.close(); // Close the input stream
+            command.clear(); // Clear the command
             return;
         }
-        int ext=command.find(".cpp");
-        string exec=command.substr(0,command.length()-ext);
+        int ext=command.find(".cpp"); // The extension integer will keep a count of when the .cpp extension is 
+        			      // found.
+        string exec=command.substr(0,command.length()-ext); // String value to help execute the file
+        
+        	// YOU CAN EXECUTE THE SHELL, WITHIN THE SHELL, WITHIN THE SHELL, WITHIN THE.....!!!!!
+        	
+        	//.....Da Da DUM!!!!
+        	
+        	// SHELLCEPTION!
         
         compile="echo -n; g++";
         compile=compile + " " + command + " -o " + exec;
@@ -207,22 +204,25 @@ void quickcompile(string& command) //This is functional, now it just needs to be
 
 void changeDir(const char* newDir)
 {
-	char dir[256] = "";
-	if(newDir[0] == '~')
+	
+	
+	char dir[256] = ""; // Character array to hold the directory name
+	if(newDir[0] == '~') // If a tilde is entered when trying to change the directory
 	{
-		char* home = const_cast<char*>(getenv("HOME"));
+		char* home = const_cast<char*>(getenv("HOME")); // A character pointer to return to the home
+								// directory
 		//strcat(home, newDir+1);
-		strcat(dir, home);
+		strcat(dir, home); // Append home to directory
 		strcat(dir, newDir+1);
 	}
 	else
 	{
-		strcat(dir, newDir);
+		strcat(dir, newDir); // Append the new directory to directory
 	}
-	if(strcmp(dir,"") == 0)
+	if(strcmp(dir,"") == 0) // If there's nothing there
 	{
 		//cout << "Changing to " << getenv("HOME") << endl;
-		chdir(getenv("HOME"));
+		chdir(getenv("HOME")); // Change directory to the home directory
 	}
 	else
 	{
