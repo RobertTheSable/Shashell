@@ -105,7 +105,15 @@ int main(){
 			changeDir(dir.c_str());
 		}
 	}
-      else
+	else if (command == "ver")
+      	{
+        	cout<<"mysh version Shmod Copyright 2015 by Students Jason Parker, Kevin Beson, Joshua Banzhoff, Robert Tulloh, Lena Bosheh\n";
+      	}
+      	else if (command == "pwd")
+      	{
+        	system("echo -n; pwd");
+      	}
+      	else
 	    error(command);
 	    
       
