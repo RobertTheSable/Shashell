@@ -163,12 +163,7 @@ void quickcompile(string& command) //This is functional, now it just needs to be
         			      // found.
         string exec=command.substr(0,command.length()-ext); // String value to help execute the file
         
-        	// YOU CAN EXECUTE THE SHELL, WITHIN THE SHELL, WITHIN THE SHELL, WITHIN THE.....!!!!!
-        	
-        	//.....Da Da DUM!!!!
-        	
-        	// SHELLCEPTION!
-        
+
         compile="echo -n; g++";
         compile=compile + " " + command + " -o " + exec;
         system(compile.c_str());
